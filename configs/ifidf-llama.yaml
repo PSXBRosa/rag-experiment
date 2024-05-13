@@ -1,0 +1,19 @@
+db:
+  path: ./assistance.sqlite3
+  command: "SELECT * FROM assistance"
+
+retriever:
+  cls: chatbot.retrievers.TfIdf
+  indexing_fn: "lambda df : df['title']"
+
+model:
+  cls: chatbot.models.Llama3
+  kwargs:
+    model_path: "./Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
+    model_init_kwargs:
+      n_ctx: 1048
+
+wrappers:
+  -  - chatbot.wrappers.AbsoluteAnswerWrapper
+     - []
+     - {}

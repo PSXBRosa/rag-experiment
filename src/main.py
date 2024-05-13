@@ -1,73 +1,49 @@
-from chatbot.models import QuestionAnswering
-from chatbot.wrappers import AppendURLWrapper, MinimumCertaintyWrapper, AbsoluteAnswerWrapper, FetchEntireSentenceWrapper
+from chatbot import models, wrappers, retrievers, cli
 
+import yaml
 import os
 import threading
 import argparse
 import sqlite3
 import pandas as pd
 import time
+from importlib import import_module
 
-# TODO -> TEST THIS FILE
+def get_cls(dotpath: str):
+    """load object from module."""
+    module_, func = dotpath.rsplit(".", maxsplit=1)
+    m = import_module(module_)
+    return getattr(m, func)
 
-def load_print(in_flag, out_flag, fps=25):
-    i = 0
-    states = ["   ", ".  ", ".. ", "..."]
-    while not in_flag.is_set():
-        print(f"[bot]: {states[i]}", end="\r")
-        i = (i + 1) % 4
-        time.sleep(1/fps)
-    out_flag.set()
+def get_args():
+    parser = argparse.ArgumentParser(prog='main')
+    parser.add_argument("yaml_path")
+    return parser.parse_args()
 
 def main():
-    parser = argparse.ArgumentParser(prog='main')
-    parser.add_argument("-f", "--context-file")
-    parser.add_argument("-k", "--k-docs", default=3)
-    argv = parser.parse_args()
+    argv = get_args()
 
-    context_file = argv.context_file
-    if context_file is None:
-        parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        context_file = os.path.join(parent_directory, "assistance.sqlite3")
+    with open(argv.yaml_path, 'r') as file:
+        configs = yaml.safe_load(file)
 
-    cnx = sqlite3.connect(context_file)
-    df = pd.read_sql_query("SELECT * FROM assistance", cnx)
+    cnx = sqlite3.connect(configs["db"]["path"])
+    cmd = configs["db"]["command"]
+    df = pd.read_sql_query(cmd, cnx)
 
-    wrappers = [
-        (AppendURLWrapper, [], {}),
-        (MinimumCertaintyWrapper, [0.05], {}),
-        (AbsoluteAnswerWrapper, [], {}),
-    ]
+    ret_cls = get_cls(configs["retriever"]["cls"])
+    bot_cls = get_cls(configs["model"]["cls"])
 
-    interpreter = QuestionAnswering(df)
-    for wrapper, args, kwargs in wrappers:
-        interpreter = wrapper(interpreter, *args, **kwargs)
+    indexing_fn = eval(configs["retriever"]["indexing_fn"])
+    ret = ret_cls(df, indexing_fn(df))  #HACK exec is a bad practice... find a solution
 
-    def process_query(in_flag, out_flag, query):
-        ans = interpreter.answer(query, argv.k_docs)
-        out_flag.set()
-        in_flag.wait()
-        print(f"[bot]: {ans}")
+    bot_kwargs = configs["model"].get("kwargs", {})
+    bot = bot_cls(df, ret, **bot_kwargs)
 
-    print("[bot]: Bonjour, votre assistant a été initialisée. Tappez 'ctrl + c' pour quitter l'app. Vous pouvez me poser n'importe quelle question et j'essaierai d'y répondre du mieux que je peux !")
+    for wrapper_cls_name, args, kwargs in configs["wrappers"]:
+        wrapper = get_cls(wrapper_cls_name)
+        bot = wrapper(bot, *args, **kwargs)
 
-    try:
-        while True:
-            query = input(">>> ")
-
-            computation_done = threading.Event()
-            printer_done = threading.Event()
-
-            print_thread = threading.Thread(target=load_print, args=(computation_done, printer_done, 4))
-            query_thread = threading.Thread(target=process_query, args=(printer_done, computation_done, query))
-
-            print_thread.start()
-            query_thread.start()
-
-            query_thread.join()
-            print_thread.join()
-    except KeyboardInterrupt:
-        pass
+    cli.run(bot, {})
 
 if __name__ == "__main__":
     main()

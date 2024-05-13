@@ -1,10 +1,11 @@
 from __future__ import annotations
-from .models import QuestionAnswering
+from .models import BaseQA
 import re
+
 
 class BaseWrapper:
 
-    def __init__(self, qa_model: QuestionAnswering | BaseWrapper):
+    def __init__(self, qa_model: BaseQA | BaseWrapper):
         assert not isinstance(qa_model, AbsoluteAnswerWrapper), "'AbsluteAnswerWrapper' is not a valid qa_model"
 
         self._qa_model = qa_model
@@ -13,18 +14,20 @@ class BaseWrapper:
     def answer(self, query: str, k_docs: int) -> dict:
         raise NotImplementedError
 
+
 class AbsoluteAnswerWrapper():
 
-    def __init__(self, qa_model: QuestionAnswering | BaseWrapper):
+    def __init__(self, qa_model: BaseQA | BaseWrapper):
         self._qa_model = qa_model
 
 
     def answer(self, query: str, k_docs: int) -> str:
         return self._qa_model.answer(query, k_docs)["answer"]
 
+
 class MinimumCertaintyWrapper(BaseWrapper):
 
-    def __init__(self, qa_model: QuestionAnswering | BaseWrapper, confidence_thr: int=0.01, *args, **kwargs):
+    def __init__(self, qa_model: BaseQA | BaseWrapper, confidence_thr: int=0.01, *args, **kwargs):
         super().__init__(qa_model, *args, **kwargs)
         self._thr = confidence_thr
 
@@ -36,11 +39,8 @@ class MinimumCertaintyWrapper(BaseWrapper):
             ans_dict["answer"] = "Je suis désolée, je ne sais pas comment répondre à cette question."
         return ans_dict
 
+
 class AppendURLWrapper(BaseWrapper):
-
-    def __init__(self, qa_model: QuestionAnswering | BaseWrapper, *args, **kwargs):
-        super().__init__(qa_model, *args, **kwargs)
-
 
     def answer(self, query: str, k_docs: int) -> dict:
         ans_dict = self._qa_model.answer(query, k_docs)
@@ -54,11 +54,8 @@ class AppendURLWrapper(BaseWrapper):
         ans_dict["answer"] += "\n\n Pour plus d'informations, accédez " + src_doc_url
         return ans_dict
 
+
 class FetchEntireSentenceWrapper(BaseWrapper):
-
-    def __init__(self, qa_model: QuestionAnswering | BaseWrapper, *args, **kwargs):
-        super().__init__(qa_model, *args, **kwargs)
-
 
     def answer(self, query: str, k_docs: int) -> dict:
         ans_dict = self._qa_model.answer(query, k_docs)
