@@ -7,6 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from . import BaseRetriever
 
+
 class TfIdf(BaseRetriever):
 
     def __init__(self, docs_df: pd.DataFrame, indexing: Iterable, **kwargs):
@@ -52,7 +53,9 @@ class TfIdf(BaseRetriever):
         docs_len = [len(self._df["content"][i]) for i in sorted_indices]
 
         # [idx doc start, idx doc ends[
-        docs_range = [(i + k, j + k) for i, j, k in zip([0] + docs_len, docs_len, range(len(docs_len)))]
+        docs_range = [
+            (i + k, j + k)
+            for i, j, k in zip([0] + docs_len, docs_len, range(len(docs_len)))
+        ]
 
         return {"ids": sorted_indices, "context": context, "ranges": docs_range}
-

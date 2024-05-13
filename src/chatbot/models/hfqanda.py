@@ -21,10 +21,7 @@ class HFQandA(BaseQA):
             None
         """
         self._model = pipeline(
-            'question-answering',
-            model=path,
-            tokenizer=path,
-            **kwargs
+            "question-answering", model=path, tokenizer=path, **kwargs
         )
 
     def get_context(self, query: str, k_docs: int) -> dict:

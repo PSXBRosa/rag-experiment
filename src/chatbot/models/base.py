@@ -6,18 +6,18 @@ from .. import retrievers
 class BaseQA:
 
     def __init__(
-            self,
-            docs_df: pd.DataFrame,
-            retriever: retrievers.BaseRetriever,
-            model_path: str,
-            **kwargs
-        ):
+        self,
+        docs_df: pd.DataFrame,
+        retriever: retrievers.BaseRetriever,
+        model_path: str,
+        **kwargs
+    ):
         """
         Initializes the class parameters
 
         Arguments: docs_df: pd.DataFrame
                        Documents used for the information retrieval
-                  
+
                    retriever: chatbot.retrievers.BaseRetriever
                        Retriever object with an implemented get_context method
 
@@ -31,7 +31,7 @@ class BaseQA:
         self._retriever = retriever
         self._model_init(model_path, **kwargs.get("model_init_kwargs", {}))
 
-    def answer(self, query: str, k_docs: int=3) -> dict:
+    def answer(self, query: str, k_docs: int = 3) -> dict:
         """
         Executes the information retrieval and text comprehension
 
@@ -47,10 +47,7 @@ class BaseQA:
         """
         context_dict = self.get_context(query, k_docs)
 
-        inp_dict = {
-            "question": query,
-            "context": context_dict["context"]
-        }
+        inp_dict = {"question": query, "context": context_dict["context"]}
 
         ans_dict = self._model(inp_dict)
         ans_dict = dict(ans_dict, **context_dict)
@@ -84,4 +81,3 @@ class BaseQA:
             None
         """
         raise NotImplementedError
-

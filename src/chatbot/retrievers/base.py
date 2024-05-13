@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import pipeline
 
 
-class BaseRetriever():
+class BaseRetriever:
 
     def __init__(self, docs_df, **kwargs):
         """

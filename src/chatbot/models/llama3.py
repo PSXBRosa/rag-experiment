@@ -13,13 +13,13 @@ from ..retrievers import BaseRetriever
 class Llama3(BaseQA):
 
     def __init__(
-            self,
-            docs_df: pd.DataFrame,
-            retriever: BaseRetriever,
-            model_path: str,
-            prompt_template: PromptTemplate = None,
-            **kwargs
-        ):
+        self,
+        docs_df: pd.DataFrame,
+        retriever: BaseRetriever,
+        model_path: str,
+        prompt_template: PromptTemplate = None,
+        **kwargs
+    ):
         """
         Initializes the class instance
 
@@ -38,9 +38,11 @@ class Llama3(BaseQA):
             None
         """
         if prompt_template is None:
-            prompt_template = PromptTemplate.from_template("Using the following context: {context},\n answer: {question}")
+            prompt_template = PromptTemplate.from_template(
+                "Using the following context: {context},\n answer: {question}"
+            )
         self._prompt_template = prompt_template
-        super().__init__(docs_df, retriever, model_path, **kwargs) 
+        super().__init__(docs_df, retriever, model_path, **kwargs)
 
     def _model_init(self, path, **kwargs):
         """
@@ -54,10 +56,7 @@ class Llama3(BaseQA):
             None
         """
         with suppress_stdout_stderr():
-            self._model = LlamaCpp(
-                model_path=path,
-                **kwargs
-            )
+            self._model = LlamaCpp(model_path=path, **kwargs)
 
     def get_context(self, query: str, k_docs: int) -> dict:
         """
@@ -82,7 +81,7 @@ class Llama3(BaseQA):
         doc_urls = [self._df["url"][i] for i in ans["ids"]]
         return dict(urls=doc_urls, **ans)
 
-    def answer(self, query: str, k_docs: int=3) -> dict:
+    def answer(self, query: str, k_docs: int = 3) -> dict:
         """
         Executes the information retrieval and text comprehension
 
@@ -99,8 +98,7 @@ class Llama3(BaseQA):
         context_dict = self.get_context(query, k_docs)
         ans = self._model.invoke(
             self._prompt_template.format(
-                question=query,
-                context=context_dict["context"]
+                question=query, context=context_dict["context"]
             )
         )
         ans_dict = dict(answer=ans, **context_dict)
@@ -110,34 +108,34 @@ class Llama3(BaseQA):
 class suppress_stdout_stderr(object):
     # extracted from https://github.com/abetlen/llama-cpp-python/issues/478
     def __enter__(self):
-        self.outnull_file = open(os.devnull, 'w')
-        self.errnull_file = open(os.devnull, 'w')
+        self.outnull_file = open(os.devnull, "w")
+        self.errnull_file = open(os.devnull, "w")
 
-        self.old_stdout_fileno_undup    = sys.stdout.fileno()
-        self.old_stderr_fileno_undup    = sys.stderr.fileno()
+        self.old_stdout_fileno_undup = sys.stdout.fileno()
+        self.old_stderr_fileno_undup = sys.stderr.fileno()
 
-        self.old_stdout_fileno = os.dup ( sys.stdout.fileno() )
-        self.old_stderr_fileno = os.dup ( sys.stderr.fileno() )
+        self.old_stdout_fileno = os.dup(sys.stdout.fileno())
+        self.old_stderr_fileno = os.dup(sys.stderr.fileno())
 
         self.old_stdout = sys.stdout
         self.old_stderr = sys.stderr
 
-        os.dup2 ( self.outnull_file.fileno(), self.old_stdout_fileno_undup )
-        os.dup2 ( self.errnull_file.fileno(), self.old_stderr_fileno_undup )
+        os.dup2(self.outnull_file.fileno(), self.old_stdout_fileno_undup)
+        os.dup2(self.errnull_file.fileno(), self.old_stderr_fileno_undup)
 
-        sys.stdout = self.outnull_file        
+        sys.stdout = self.outnull_file
         sys.stderr = self.errnull_file
         return self
 
-    def __exit__(self, *_):        
+    def __exit__(self, *_):
         sys.stdout = self.old_stdout
         sys.stderr = self.old_stderr
 
-        os.dup2 ( self.old_stdout_fileno, self.old_stdout_fileno_undup )
-        os.dup2 ( self.old_stderr_fileno, self.old_stderr_fileno_undup )
+        os.dup2(self.old_stdout_fileno, self.old_stdout_fileno_undup)
+        os.dup2(self.old_stderr_fileno, self.old_stderr_fileno_undup)
 
-        os.close ( self.old_stdout_fileno )
-        os.close ( self.old_stderr_fileno )
+        os.close(self.old_stdout_fileno)
+        os.close(self.old_stderr_fileno)
 
         self.outnull_file.close()
         self.errnull_file.close()

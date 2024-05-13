@@ -9,21 +9,24 @@ import pandas as pd
 import time
 from importlib import import_module
 
+
 def get_cls(dotpath: str):
     """load object from module."""
     module_, func = dotpath.rsplit(".", maxsplit=1)
     m = import_module(module_)
     return getattr(m, func)
 
+
 def get_args():
-    parser = argparse.ArgumentParser(prog='main')
+    parser = argparse.ArgumentParser(prog="main")
     parser.add_argument("yaml_path")
     return parser.parse_args()
+
 
 def main():
     argv = get_args()
 
-    with open(argv.yaml_path, 'r') as file:
+    with open(argv.yaml_path, "r") as file:
         configs = yaml.safe_load(file)
 
     cnx = sqlite3.connect(configs["db"]["path"])
@@ -34,7 +37,7 @@ def main():
     bot_cls = get_cls(configs["model"]["cls"])
 
     indexing_fn = eval(configs["retriever"]["indexing_fn"])
-    ret = ret_cls(df, indexing_fn(df))  #HACK exec is a bad practice... find a solution
+    ret = ret_cls(df, indexing_fn(df))  # HACK exec is a bad practice... find a solution
 
     bot_kwargs = configs["model"].get("kwargs", {})
     bot = bot_cls(df, ret, **bot_kwargs)
@@ -44,6 +47,7 @@ def main():
         bot = wrapper(bot, *args, **kwargs)
 
     cli.run(bot, {})
+
 
 if __name__ == "__main__":
     main()
