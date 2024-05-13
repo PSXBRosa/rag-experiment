@@ -4,3 +4,8 @@ scikit-learn==1.2.2
 torch==2.0.1
 sentencepiece==0.1.99
 transformers==4.34.1
+langchain==0.1.19
+langchain-community==0.0.38
+langchain-core==0.1.52
+langchain-text-splitters==0.0.1
+llama_cpp_python==0.2.72

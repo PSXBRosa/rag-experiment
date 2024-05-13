@@ -8,7 +8,7 @@
 
 from the root folder:
 
-```python src/main.py```
+```python src/main.py configs/ifidf-camembert.yaml```
 
 ## Theorical explaination
 
