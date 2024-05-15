@@ -1,14 +1,13 @@
-from chatbot import models, wrappers, retrievers, cli
+"""run the program"""
 
-import yaml
-import os
-import threading
 import argparse
 import sqlite3
-import pandas as pd
-import time
 from importlib import import_module
 
+import yaml
+import pandas as pd
+
+from chatbot import models, wrappers, retrievers, cli
 
 def get_cls(dotpath: str):
     """load object from module."""
@@ -18,12 +17,14 @@ def get_cls(dotpath: str):
 
 
 def get_args():
+    """get program arguments"""
     parser = argparse.ArgumentParser(prog="main")
     parser.add_argument("yaml_path")
     return parser.parse_args()
 
 
 def main():
+    """run the program"""
     argv = get_args()
 
     with open(argv.yaml_path, "r") as file:
