@@ -9,6 +9,7 @@ import pandas as pd
 
 from chatbot import models, wrappers, retrievers, cli
 
+
 def get_cls(dotpath: str):
     """load object from module."""
     module_, func = dotpath.rsplit(".", maxsplit=1)

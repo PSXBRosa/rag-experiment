@@ -9,7 +9,6 @@ from . import BaseRetriever
 
 
 class TfIdf(BaseRetriever):
-
     def __init__(self, docs_df: pd.DataFrame, indexing: Iterable, **kwargs):
         """
         Initialize the retriever object

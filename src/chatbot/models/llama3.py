@@ -11,7 +11,6 @@ from ..retrievers import BaseRetriever
 
 
 class Llama3(BaseQA):
-
     def __init__(
         self,
         docs_df: pd.DataFrame,
@@ -68,29 +67,6 @@ class Llama3(BaseQA):
             None
         """
         self._prompt_template = pt
-
-    def get_context(self, query: str, k_docs: int) -> dict:
-        """
-        Information retrieval part of the model.
-
-        Parameters: query : str
-                        input query
-
-                    k_docs : int
-                        number of best ranking documents to be fed forward into the text
-                        comprehension model
-
-        Returns: ans : dict
-                    A dictionary containing the following keys: "context", "ranges" and "urls".
-                    The context is the concatenation of the top k documentss while "ranges"
-                    and "urls" are respectively the start and end indexes of each document in-
-                    side the context field and the urls related to those documents.
-        """
-
-        # add the urls to the answer
-        ans = super().get_context(query, k_docs)
-        doc_urls = [self._df["url"][i] for i in ans["ids"]]
-        return dict(urls=doc_urls, **ans)
 
     def answer(self, query: str, k_docs: int = 3) -> dict:
         """

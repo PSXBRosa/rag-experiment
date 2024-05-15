@@ -4,7 +4,6 @@ from .. import retrievers
 
 
 class BaseQA:
-
     def __init__(
         self,
         docs_df: pd.DataFrame,

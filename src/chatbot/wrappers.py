@@ -5,7 +5,6 @@ from .models import BaseQA
 
 
 class BaseWrapper:
-
     def __init__(self, qa_model: BaseQA | BaseWrapper):
         assert not isinstance(
             qa_model, AbsoluteAnswerWrapper
@@ -18,7 +17,6 @@ class BaseWrapper:
 
 
 class AbsoluteAnswerWrapper:
-
     def __init__(self, qa_model: BaseQA | BaseWrapper):
         self._qa_model = qa_model
 
@@ -27,7 +25,6 @@ class AbsoluteAnswerWrapper:
 
 
 class MinimumCertaintyWrapper(BaseWrapper):
-
     def __init__(
         self,
         qa_model: BaseQA | BaseWrapper,
@@ -42,14 +39,13 @@ class MinimumCertaintyWrapper(BaseWrapper):
         ans_dict = self._qa_model.answer(query, k_docs)
 
         if ans_dict["score"] < self._thr:
-            ans_dict["answer"] = (
-                "Je suis désolée, je ne sais pas comment répondre à cette question."
-            )
+            ans_dict[
+                "answer"
+            ] = "Je suis désolée, je ne sais pas comment répondre à cette question."
         return ans_dict
 
 
 class AppendURLWrapper(BaseWrapper):
-
     def answer(self, query: str, k_docs: int) -> dict:
         ans_dict = self._qa_model.answer(query, k_docs)
         start, end, ranges, urls = (
@@ -69,7 +65,6 @@ class AppendURLWrapper(BaseWrapper):
 
 
 class FetchEntireSentenceWrapper(BaseWrapper):
-
     def answer(self, query: str, k_docs: int) -> dict:
         ans_dict = self._qa_model.answer(query, k_docs)
         start, end, context = ans_dict["start"], ans_dict["end"], ans_dict["context"]
@@ -99,7 +94,6 @@ class FetchEntireSentenceWrapper(BaseWrapper):
 
 
 class SetPromptTemplate(BaseWrapper):
-    
     def __init__(self, qa_model: BaseQA | BaseWrapper, prompt_text: str):
         super().__init__(qa_model)
         pt = PromptTemplate.from_template(prompt_text)
@@ -107,6 +101,3 @@ class SetPromptTemplate(BaseWrapper):
 
     def answer(self, *args, **kwargs):
         return self._qa_model.answer(*args, **kwargs)
-
-
-

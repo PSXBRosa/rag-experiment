@@ -6,7 +6,6 @@ from transformers import pipeline
 
 
 class BaseRetriever:
-
     def __init__(self, docs_df, **kwargs):
         """
         Initialize the retriever object
