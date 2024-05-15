@@ -1,6 +1,7 @@
 from __future__ import annotations
-from .models import BaseQA
 import re
+from langchain_core.prompts import PromptTemplate
+from .models import BaseQA
 
 
 class BaseWrapper:
@@ -95,3 +96,17 @@ class FetchEntireSentenceWrapper(BaseWrapper):
             if ans_dict["answer"] in sentence:
                 ans_dict["answer"] = sentence
         return ans_dict
+
+
+class SetPromptTemplate(BaseWrapper):
+    
+    def __init__(self, qa_model: BaseQA | BaseWrapper, prompt_text: str):
+        super().__init__(qa_model)
+        pt = PromptTemplate.from_template(prompt_text)
+        self._qa_model.set_prompt_template(pt)
+
+    def answer(self, *args, **kwargs):
+        return self._qa_model.answer(*args, **kwargs)
+
+
+

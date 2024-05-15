@@ -31,7 +31,7 @@ class Llama3(BaseQA):
                         The path to the pretrained model used for the question answering
                         task
 
-                    prompt_template (optional): langchain_core.promts.PromptTemplate
+                    prompt_template (optional): langchain_core.prompts.PromptTemplate
                         Prompt template. Must have placeholders for the context and the question.
 
         Returns:
@@ -57,6 +57,17 @@ class Llama3(BaseQA):
         """
         with suppress_stdout_stderr():
             self._model = LlamaCpp(model_path=path, **kwargs)
+
+    def set_prompt_template(self, pt: PromptTemplate):
+        """
+        Set a new prompt template
+
+        Arguments: pt : langchain_core.prompts.PromptTemplate
+
+        Returns:
+            None
+        """
+        self._prompt_template = pt
 
     def get_context(self, query: str, k_docs: int) -> dict:
         """
