@@ -40,7 +40,7 @@ def run(bot, argv={}):
             )
             query_thread = threading.Thread(
                 target=process_query,
-                args=(printer_done, computation_done, bot, query, argv),
+                args=(printer_done, computation_done, bot, query),
             )
 
             print_thread.start()

@@ -68,7 +68,7 @@ class Llama3(BaseQA):
         """
         self._prompt_template = pt
 
-    def answer(self, query: str, k_docs: int = 3) -> dict:
+    def answer(self, query: str) -> dict:
         """
         Executes the information retrieval and text comprehension
 
@@ -82,7 +82,7 @@ class Llama3(BaseQA):
         Returns: ans : dict
                     A dictionary containing the model output plus the information retrieval fields
         """
-        context_dict = self.get_context(query, k_docs)
+        context_dict = self.get_context(query)
         ans = self._model.invoke(
             self._prompt_template.format(
                 question=query, context=context_dict["context"]

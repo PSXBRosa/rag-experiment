@@ -43,7 +43,8 @@ def main():
     bot_cls = get_cls(configs["model"]["cls"])
 
     indexing_fn = eval(configs["retriever"]["indexing_fn"])
-    ret = ret_cls(df, indexing_fn(df))  # HACK exec is a bad practice... find a solution
+    kdocs = configs["retriever"].get("k_docs", 3) 
+    ret = ret_cls(df, indexing_fn(df), kdocs)  # HACK exec is a bad practice... find a solution
 
     bot_kwargs = configs["model"].get("kwargs", {})
     bot = bot_cls(df, ret, **bot_kwargs)
@@ -52,7 +53,7 @@ def main():
         wrapper = get_cls(wrapper_cls_name)
         bot = wrapper(bot, *args, **kwargs)
 
-    cli.run(bot, {})
+    cli.run(bot)
 
 
 if __name__ == "__main__":

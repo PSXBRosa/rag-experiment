@@ -9,7 +9,8 @@ from . import BaseRetriever
 
 
 class TfIdf(BaseRetriever):
-    def __init__(self, docs_df: pd.DataFrame, indexing: Iterable, **kwargs):
+    def __init__(self, docs_df: pd.DataFrame, indexing: Iterable, k_docs: int,
+                 **kwargs):
         """
         Initialize the retriever object
 
@@ -17,16 +18,18 @@ class TfIdf(BaseRetriever):
                       Documents used for the retrieval
                   indexing: Iterable
                       Indexing for the vectorizer
+                  k_docs: int
+                      Number of docs to be retrieved
                   **kwargs
 
         Returns:
             None
         """
-        super().__init__(docs_df)
+        super().__init__(docs_df, k_docs)
         self._tfidf_vectorizer = TfidfVectorizer(**kwargs)
         self._tfidf_matrix = self._tfidf_vectorizer.fit_transform(indexing)
 
-    def get_context(self, query: str, k_docs: int) -> dict:
+    def get_context(self, query: str) -> dict:
         """
         Retrieves the k first relevant documents
 
@@ -44,7 +47,7 @@ class TfIdf(BaseRetriever):
         query_vector = query_vector.toarray()[0]
 
         document_scores = self._tfidf_matrix.dot(query_vector)
-        sorted_indices = document_scores.argsort()[::-1][:k_docs]
+        sorted_indices = document_scores.argsort()[::-1][:self.k_docs]
 
         doc_contents = [self._df["content"][i] for i in sorted_indices]
         context = "\n".join(doc_contents)

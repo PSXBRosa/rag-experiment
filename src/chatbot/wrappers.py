@@ -12,7 +12,7 @@ class BaseWrapper:
 
         self._qa_model = qa_model
 
-    def answer(self, query: str, k_docs: int) -> dict:
+    def answer(self, query: str) -> dict:
         raise NotImplementedError
 
 
@@ -20,8 +20,8 @@ class AbsoluteAnswerWrapper:
     def __init__(self, qa_model: BaseQA | BaseWrapper):
         self._qa_model = qa_model
 
-    def answer(self, query: str, k_docs: int) -> str:
-        return self._qa_model.answer(query, k_docs)["answer"]
+    def answer(self, query: str) -> str:
+        return self._qa_model.answer(query)["answer"]
 
 
 class MinimumCertaintyWrapper(BaseWrapper):
@@ -35,8 +35,8 @@ class MinimumCertaintyWrapper(BaseWrapper):
         super().__init__(qa_model, *args, **kwargs)
         self._thr = confidence_thr
 
-    def answer(self, query: str, k_docs: int) -> dict:
-        ans_dict = self._qa_model.answer(query, k_docs)
+    def answer(self, query: str) -> dict:
+        ans_dict = self._qa_model.answer(query)
 
         if ans_dict["score"] < self._thr:
             ans_dict[
@@ -46,8 +46,8 @@ class MinimumCertaintyWrapper(BaseWrapper):
 
 
 class AppendURLWrapper(BaseWrapper):
-    def answer(self, query: str, k_docs: int) -> dict:
-        ans_dict = self._qa_model.answer(query, k_docs)
+    def answer(self, query: str) -> dict:
+        ans_dict = self._qa_model.answer(query)
         start, end, ranges, urls = (
             ans_dict["start"],
             ans_dict["end"],
@@ -65,8 +65,8 @@ class AppendURLWrapper(BaseWrapper):
 
 
 class FetchEntireSentenceWrapper(BaseWrapper):
-    def answer(self, query: str, k_docs: int) -> dict:
-        ans_dict = self._qa_model.answer(query, k_docs)
+    def answer(self, query: str) -> dict:
+        ans_dict = self._qa_model.answer(query)
         start, end, context = ans_dict["start"], ans_dict["end"], ans_dict["context"]
 
         def find_newline(rng):

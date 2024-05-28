@@ -6,7 +6,7 @@ from transformers import pipeline
 
 
 class BaseRetriever:
-    def __init__(self, docs_df, **kwargs):
+    def __init__(self, docs_df, k_docs, **kwargs):
         """
         Initialize the retriever object
 
@@ -18,6 +18,7 @@ class BaseRetriever:
             None
         """
         self._df = docs_df
+        self.k_docs = k_docs
 
     def get_context(self, query: str, k_docs: int) -> dict:
         """
