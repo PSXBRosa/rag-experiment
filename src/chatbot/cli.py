@@ -2,14 +2,16 @@ import time
 import threading
 
 
-def process_query(in_flag, out_flag, bot, query, argv):
-    ans = bot.answer(query, argv.get("k_docs", 3))
+def process_query(in_flag, out_flag, bot, query):
+    """send the query to be processed"""
+    ans = bot.answer(query)
     out_flag.set()
     in_flag.wait()
     print(f"[bot]: {ans}")
 
 
 def load_print(in_flag, out_flag, fps=25):
+    """print a loading animation while a flag is not set"""
     i = 0
     states = ["   ", ".  ", ".. ", "..."]
     while not in_flag.is_set():
@@ -19,7 +21,8 @@ def load_print(in_flag, out_flag, fps=25):
     out_flag.set()
 
 
-def run(bot, argv):
+def run(bot, argv={}):
+    """run the cli"""
     print(
         "[bot]: Bonjour, votre assistant a été initialisée. Tappez 'ctrl + c' pour quitter l'app. "
         "Vous pouvez me poser n'importe quelle question et j'essaierai d'y répondre du mieux que je peux !"
