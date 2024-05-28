@@ -35,6 +35,10 @@ def main():
     cmd = configs["db"]["command"]
     df = pd.read_sql_query(cmd, cnx)
 
+    for preproc_func, args, kwargs in configs["preproc"]:
+        func = get_cls(preproc_func)
+        df = func(df, *args, **kwargs)
+
     ret_cls = get_cls(configs["retriever"]["cls"])
     bot_cls = get_cls(configs["model"]["cls"])
 
